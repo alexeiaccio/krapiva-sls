@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "googleapis": "27",
+    "serverless-offline": "^3.25.10"
+  }
+}
