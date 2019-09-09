@@ -1,33 +1,7 @@
 "use strict";
 
-const writeSheet = require("./googleSheet");
 const updateSheet = require("./googleSheet");
 const readSheet = require("./readSheet");
-const s4 = require("./s4");
-
-module.exports.subscribe = (event, context, callback) => {
-  const newValues = [
-    s4(),
-    new Date().toISOString(),
-    event.queryStringParameters.name,
-    event.queryStringParameters.email
-  ];
-
-  const response = {
-    statusCode: 200,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET"
-    },
-    body: JSON.stringify({
-      message: "Write!",
-      input: event
-    })
-  };
-
-  writeSheet("Subscribtions!A:D", newValues);
-  callback(null, response);
-};
 
 module.exports.counter = (event, context, callback) => {
   const newValues = [

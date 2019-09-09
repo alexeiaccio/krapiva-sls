@@ -1,7 +1,5 @@
 const { google } = require("googleapis");
-const privatekey = require("./krapiva-0734748d4bd3.json");
-
-const SHEET_ID = "1dLj99jB8EsdemDuK2LQ0hV580fOfyqIfdsjb3q0S-yo";
+const privatekey = JSON.parse(process.env.PRIVATE_KEY);
 
 let jwtClient = new google.auth.JWT(
   privatekey.client_email,
@@ -25,7 +23,7 @@ async function readSheet(range, cb) {
   return sheets.spreadsheets.values.get(
     {
       auth: jwtClient,
-      spreadsheetId: SHEET_ID,
+      spreadsheetId: process.env.SHEET_ID,
       range: range,
       majorDimension: "ROWS",
       valueRenderOption: "FORMATTED_VALUE"

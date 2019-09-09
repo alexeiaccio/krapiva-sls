@@ -1,68 +1,29 @@
-const fs = require("fs");
-const readline = require("readline");
 const { google } = require("googleapis");
+const privatekey = JSON.parse(process.env.PRIVATE_KEY);
 
-const SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
-const TOKEN_PATH = "token.json";
-const SHEET_ID = "1dLj99jB8EsdemDuK2LQ0hV580fOfyqIfdsjb3q0S-yo";
+let jwtClient = new google.auth.JWT(
+  privatekey.client_email,
+  null,
+  privatekey.private_key,
+  ["https://www.googleapis.com/auth/spreadsheets"]
+);
 
-function authorize(credentials, callback) {
-  const { client_secret, client_id, redirect_uris } = credentials.installed;
-  const oAuth2Client = new google.auth.OAuth2(
-    client_id,
-    client_secret,
-    redirect_uris[0]
-  );
+jwtClient.authorize(function(err, tokens) {
+  if (err) {
+    console.log(err);
+    return;
+  } else {
+    console.log("Successfully connected!");
+  }
+});
 
-  fs.readFile(TOKEN_PATH, (err, token) => {
-    if (err) return getNewToken(oAuth2Client, callback);
-    oAuth2Client.setCredentials(JSON.parse(token));
-    callback(oAuth2Client);
-  });
-}
+function writeToRange(range, values) {
+  const sheets = google.sheets("v4");
 
-function getNewToken(oAuth2Client, callback) {
-  const authUrl = oAuth2Client.generateAuthUrl({
-    access_type: "offline",
-    scope: SCOPES
-  });
-  console.log("Authorize this app by visiting this url:", authUrl);
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-  rl.question("Enter the code from that page here: ", code => {
-    rl.close();
-    oAuth2Client.getToken(code, (err, token) => {
-      if (err) return callback(err);
-      oAuth2Client.setCredentials(token);
-      // Store the token to disk for later program executions
-      fs.writeFile(TOKEN_PATH, JSON.stringify(token), err => {
-        if (err) console.error(err);
-        console.log("Token stored to", TOKEN_PATH);
-      });
-      callback(oAuth2Client);
-    });
-  });
-}
-
-const writeSheet = (range, values) =>
-  fs.readFile("credentials.json", (err, content) => {
-    if (err) return console.log("Error loading client secret file:", err);
-    authorize(JSON.parse(content), auth => writeToRange(auth, range, values));
-  });
-
-const updateSheet = (range, values) =>
-  fs.readFile("credentials.json", (err, content) => {
-    if (err) return console.log("Error loading client secret file:", err);
-    authorize(JSON.parse(content), auth => updateRange(auth, range, values));
-  });
-
-function writeToRange(auth, range, values) {
-  const sheets = google.sheets({ version: "v4", auth });
   sheets.spreadsheets.values.append(
     {
-      spreadsheetId: SHEET_ID,
+      auth: jwtClient,
+      spreadsheetId: process.env.SHEET_ID,
       range: range,
       includeValuesInResponse: true,
       insertDataOption: "INSERT_ROWS",
@@ -82,11 +43,13 @@ function writeToRange(auth, range, values) {
   );
 }
 
-function updateToRange(auth, range, values) {
-  const sheets = google.sheets({ version: "v4", auth });
+function updateToRange(range, values) {
+  const sheets = google.sheets("v4");
+
   sheets.spreadsheets.values.update(
     {
-      spreadsheetId: SHEET_ID,
+      auth: jwtClient,
+      spreadsheetId: process.env.SHEET_ID,
       range: range,
       includeValuesInResponse: true,
       valueInputOption: "USER_ENTERED",
@@ -105,11 +68,13 @@ function updateToRange(auth, range, values) {
   );
 }
 
-function updateRange(auth, range, values) {
-  const sheets = google.sheets({ version: "v4", auth });
+function updateSheet(range, values) {
+  const sheets = google.sheets("v4");
+
   sheets.spreadsheets.values.get(
     {
-      spreadsheetId: SHEET_ID,
+      auth: jwtClient,
+      spreadsheetId: process.env.SHEET_ID,
       range: range,
       majorDimension: "ROWS",
       valueRenderOption: "FORMATTED_VALUE"
@@ -131,14 +96,13 @@ function updateRange(auth, range, values) {
               : value
         );
         if (matchValues.length > 0) {
-          updateToRange(auth, range, newValues);
+          updateToRange(range, newValues);
         } else {
-          writeToRange(auth, range, [values]);
+          writeToRange(range, [values]);
         }
       }
     }
   );
 }
 
-module.exports = writeSheet;
 module.exports = updateSheet;

@@ -5,7 +5,4 @@ jspm_packages
 # Serverless directories
 .serverless
 
-
-credentials.json
-client_secret.json
-token.json
+.env
