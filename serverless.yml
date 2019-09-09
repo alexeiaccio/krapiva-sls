@@ -6,6 +6,7 @@ tenant: alexeiaccio
 provider:
   name: aws
   runtime: nodejs8.10
+  cfnRole: ${env:CFN_ROLE}
 
 functions:
   subscribe:
