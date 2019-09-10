@@ -1,6 +1,14 @@
 {
+  "name": "krapiva-sls",
+  "version": "0.0.1",
+  "license": "MIT",
+  "scripts": {
+    "develop": "serverless offline start",
+    "build": "serverless deploy"
+  },
   "dependencies": {
     "googleapis": "^43.0.0",
+    "prismic-javascript": "^2.1.1",
     "serverless-offline": "^3.25.10"
   },
   "devDependencies": {

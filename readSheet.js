@@ -17,7 +17,7 @@ jwtClient.authorize(function(err, tokens) {
   }
 });
 
-async function readSheet(range, cb) {
+function readSheet(range, cb) {
   const sheets = google.sheets("v4");
 
   return sheets.spreadsheets.values.get(
