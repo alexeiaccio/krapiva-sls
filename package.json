@@ -9,7 +9,7 @@
   "dependencies": {
     "googleapis": "^43.0.0",
     "prismic-javascript": "^2.1.1",
-    "serverless-offline": "^3.25.10"
+    "serverless-offline": "^12.0.3"
   },
   "devDependencies": {
     "serverless-dotenv-plugin": "^2.1.1"
